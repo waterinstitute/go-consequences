@@ -47,10 +47,10 @@ func (cr *cogReader) ProvideValue(l geography.Location) (float64, error) {
 	px := int(igt[0] + l.X*igt[1] + l.Y*igt[2])
 	py := int(igt[3] + l.X*igt[4] + l.Y*igt[5])
 	buffer := make([]float32, 1*1)
-	if px < 0 || px > rb.XSize() {
+	if px < 0 || px >= rb.XSize() {
 		return cr.nodata, NoDataHazardError{Input: "X is out of range"}
 	}
-	if py < 0 || py > rb.YSize() {
+	if py < 0 || py >= rb.YSize() {
 		return cr.nodata, NoDataHazardError{Input: "Y is out of range"}
 	}
 	err := rb.IO(gdal.Read, px, py, 1, 1, buffer, 1, 1, 0, 0)
@@ -72,9 +72,9 @@ func (cr *cogReader) GetBoundingBox() (geography.BBox, error) {
 	gt := cr.ds.GeoTransform()
 	dx := cr.ds.RasterXSize()
 	dy := cr.ds.RasterYSize()
-	bbox[0] = gt[0]                     //upper left x
-	bbox[1] = gt[3]                     //upper left y
-	bbox[2] = gt[0] + gt[1]*float64(dx) //lower right x
-	bbox[3] = gt[3] + gt[5]*float64(dy) //lower right y
+	bbox[0] = gt[0]                     //upper left x --xmin
+	bbox[1] = gt[3]                     //upper left y --ymax
+	bbox[2] = gt[0] + gt[1]*float64(dx) //lower right x --xmax
+	bbox[3] = gt[3] + gt[5]*float64(dy) //lower right y -- ymin
 	return geography.BBox{Bbox: bbox}, nil
 }
