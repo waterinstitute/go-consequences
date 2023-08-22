@@ -2,6 +2,7 @@ package main
 //Main code using raster as an input
 import (
 	"fmt"
+	"os"
 	"flag"
 	"github.com/USACE/go-consequences/compute"
 	"github.com/USACE/go-consequences/hazardproviders"
@@ -27,7 +28,7 @@ func main() {
 	}
 	//check for close
 	//define result writer
-	myEventResults, c := resultswriters.InitShpResultsWriter(*result, "event_results")
+	myEventResults, c := resultswriters.InitShpResultsWriter(*result + os.Getenv("SI_VERSION") + ".shp", "event_results")
 	if c != nil {
 		panic(c)
 	}

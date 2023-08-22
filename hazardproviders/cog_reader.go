@@ -31,7 +31,8 @@ func initCR(fp string) (cogReader, error) {
 		return cogReader{}, errors.New("Cannot connect to raster at path " + fp + err.Error())
 	}
 	v, valid := ds.RasterBand(1).NoDataValue()
-	cr := cogReader{FilePath: fp, ds: &ds, verticalIsMeters: false}
+	outputDs := ProjectToWGS(&ds)
+	cr := cogReader{FilePath: fp, ds: &outputDs, verticalIsMeters: false}
 	if valid {
 		cr.nodata = v
 	}
@@ -77,4 +78,23 @@ func (cr *cogReader) GetBoundingBox() (geography.BBox, error) {
 	bbox[2] = gt[0] + gt[1]*float64(dx) //lower right x --xmax
 	bbox[3] = gt[3] + gt[5]*float64(dy) //lower right y -- ymin
 	return geography.BBox{Bbox: bbox}, nil
+}
+
+func ProjectToWGS(ds *gdal.Dataset) (gdal.Dataset) {
+	spatialRef := gdal.CreateSpatialReference("")
+	spatialRef.FromEPSG(4326)
+	spatialRefInput := gdal.CreateSpatialReference("")
+	spatialRefInput.FromWKT(ds.Projection())
+	fmt.Println("\033[32mRaster Input coordinate system \033[0m" + ds.Projection())
+	//Get ds spatial ref
+	if !spatialRef.IsSame(spatialRefInput) {
+		opts := []string{"-t_srs", "epsg:4326","-of", "MEM"}
+		outputDs := gdal.GDALWarp("MEM:::", gdal.Dataset{}, []gdal.Dataset{*ds}, opts)
+		fmt.Println("\033[33mRaster Transformed  - coordinate system \033[0m" + outputDs.Projection())
+		return outputDs
+
+	} else {
+		return *ds
+	}
+
 }

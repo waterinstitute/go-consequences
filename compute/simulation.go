@@ -69,10 +69,10 @@ func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 }
 func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	//get boundingbox
-	fmt.Println("Getting bbox")
+	fmt.Println("\033[32mGetting bbox\033[0m")
 	bbox, err := hp.ProvideHazardBoundary()
 	if err != nil {
-		log.Panicf("Unable to get the raster bounding box: %s", err)
+		log.Panicf("\033[31mUnable to get the raster bounding box: %s\033[0m", err)
 	}
 	fmt.Println(bbox.ToString())
 	sp.ByBbox(bbox, func(f consequences.Receptor) {
